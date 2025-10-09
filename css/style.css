@@ -1,0 +1,21 @@
+.box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.box .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.box .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    color: white;
+}
+.box .btn:hover {
+    background-color: black;
+    color: white;
+}
+.box .btn:focus {
+    box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.25);
+}
