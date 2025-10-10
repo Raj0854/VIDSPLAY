@@ -58,42 +58,168 @@
 
                 <ul class="navbar-nav nav nav-underline me-auto mb-2 mb-lg-0 text-white">
                     <li class="nav-item">
-                        <a class="nav-link " aria-current="page" href="#">Home</a>
+                        <a class="nav-link active" aria-current="page" href="index.html">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Movies</a>
+                        <a class="nav-link" href="movies.html">Movies</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">TV Shows</a>
+                        <a class="nav-link" href="tv-shows.html">TV Shows</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Web Series</a>
+                        <a class="nav-link" href="web-series.html">Web Series</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Anime</a>
+                        <a class="nav-link" href="anime.html">Anime</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Documentary</a>
+                        <a class="nav-link" href="documentary.html">Documentary</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Kids</a>
+                        <a class="nav-link" href="kids.html">Kids</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Music</a>
+                        <a class="nav-link" href="music.html">Music</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Sports</a>
+                        <a class="nav-link" href="sports.html">Sports</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Dance</a>
+                        <a class="nav-link" href="dance.html">Dance</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
     <!-- second navbar end -->
+    <marquee class="bg-light text-black" behavior="scroll" direction="left" scrollamount="5">
+        Welcome to VIDSPLAY - Your Ultimate Destination for Movies, TV Shows, Web Series, Anime, Documentaries,
+        Kids' Content, Music, Sports, and Dance Entertainment!
+    </marquee>
     <!-- center section start -->
-    
+    <div class="container-fluid mt-3">
+        <h2 class="text-white mb-4">Recommended For You</h2>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card h-100" data-bs-toggle="modal" data-bs-target="#sundariModal">
+                    <img src="img/sundari.avif" class="card-img-top p-1 rounded-3" alt="Song 1">
+                    <div class="card-body">
+                        <h5 class="card-title">Sundari Song</h5>
+                        <p class="card-text">
+                            Sundari Sundari Tujhe Nav Kay (Official Video) Sanju Rathod | HaiTak Tak Dekharo Savariya
+                            |New Song</p>
+                        <p class="card-text">Views: 1M</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 " data-bs-toggle="modal" data-bs-target="#sapphireModal">
+                    <img src="img/sapphire.png" class="card-img-top p-1 rounded-3" alt="Song 2">
+                    <div class="card-body">
+                        <h5 class="card-title"> Ed Sheeran - Sapphire</h5>
+                        <p class="card-text">
+                            Ed Sheeran - Sapphire (feat. Arijit Singh) [Lyric Video Song] New release! | Watch now |
+                            Trending #5 on VIDSPLAY</p>
+                        <p class="card-text">Views: 50.6M</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 " data-bs-toggle="modal" data-bs-target="#devaDevaModal">
+                    <img src="img/deva.avif" class="card-img-top p-1 rounded-3" alt="Song 2">
+                    <div class="card-body">
+                        <h5 class="card-title">Deva Deva Song</h5>
+                        <p class="card-text"> Deva Deva - Brahmāstra | Amitabh B | Ranbir Kapoor | Alia Bhatt | Pritam |
+                            Arijit | Amitabh | Jonita</p>
+                        <p class="card-text">Views: 1.8M</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100" data-bs-toggle="modal" data-bs-target="#aavanJaavanModal">
+                    <img src="img/aavan jaavan.avif" class="card-img-top p-1 rounded-3" alt="Song 2">
+                    <div class="card-body">
+                        <h5 class="card-title">Aavan Jaavan Song</h5>
+                        <p class="card-text">
+                            Aavan Jaavan Song | WAR 2 | Hrithik Roshan, Kiara Advani | Pritam, Arijit Singh, Nikhita |
+                            Amitabh Bhattacharya </p>
+                        <p class="card-text">Views: 500K</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Button trigger modal -->
+
+
+
 </body>
 
 </html>
+
+
+
+<!-- Modal -->
+<!-- sundari song -->
+<div class="modal fade" id="sundariModal" tabindex="-1" aria-labelledby="sundariModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="sundariModalLabel">Sundari Song</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe width="1047" height="589" src="https://www.youtube.com/embed/WpBn9w-Js_c?list=RDWpBn9w-Js_c"
+                    title="Sundari (Official Video) Sanju Rathod Ft. Yashika Jatav | G-Spark | Marathi Song 2025"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- sapphire song -->
+<div class="modal fade" id="sapphireModal" tabindex="-1" aria-labelledby="sapphireModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="sapphireModalLabel">Sapphire Song</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe width="1047" height="589" src="https://www.youtube.com/embed/JgDNFQ2RaLQ?list=RDJgDNFQ2RaLQ" title="Ed Sheeran - Sapphire (Official Music Video)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- deva deva song -->
+<div class="modal fade" id="devaDevaModal" tabindex="-1" aria-labelledby="devaDevaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="devaDevaModalLabel">Deva Deva Song</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe width="1047" height="589" src="https://www.youtube.com/embed/mNuhKUOD_A0?list=RDmNuhKUOD_A0" title="Deva Deva - Extended Film Version|Brahmāstra|Amitabh B|Ranbir |@Alia Bhatt|@Pritam |Arijit|Jonita" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- aavan jaavan song -->
+<div class="modal fade" id="aavanJaavanModal" tabindex="-1" aria-labelledby="aavanJaavanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="aavanJaavanModalLabel">Aavan Jaavan Song</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe width="1047" height="589" src="https://www.youtube.com/embed/enjkcCdAlXc?list=RDenjkcCdAlXc" title="Aavan Jaavan Song | WAR 2 | Hrithik Roshan, Kiara Advani | Pritam, Arijit Singh, Nikhita | Amitabh B" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
