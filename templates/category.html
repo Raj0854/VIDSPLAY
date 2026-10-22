@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}VIDSPLAY — {{ category.name }} Videos{% endblock %}
+{% block meta_description %}{{ category.description or 'Watch ' ~ category.name ~ ' videos and series on VIDSPLAY.' }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+
+    <!-- Category Header Banner -->
+    <div class="vp-hero-banner mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: var(--vp-accent-gradient); width: 64px; height: 64px; min-width: 64px; color: #0b0f19;">
+                <i class="bi {{ category.icon or 'bi-collection-play' }} fs-2"></i>
+            </div>
+            <div>
+                <span class="vp-hero-badge"><i class="bi bi-tag"></i> Category</span>
+                <h1 class="display-6 fw-bold text-white mb-1">{{ category.name }}</h1>
+                <p class="text-secondary mb-0" style="font-size: 0.95rem;">
+                    {{ category.description or "Watch top rated " ~ category.name ~ " videos and content on VIDSPLAY." }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Sort Bar -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 p-3 rounded-3" style="background: var(--vp-bg-card); border: 1px solid var(--vp-border);">
+        <div class="text-secondary small">
+            Showing <strong class="text-white">{{ videos|length }}</strong> videos in <strong class="text-info">{{ category.name }}</strong>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <label class="text-secondary small mb-0">Sort By:</label>
+            <select class="form-select form-select-sm bg-dark text-white border-secondary" id="vpCategorySortSelect" style="width: auto;">
+                <option value="newest">Newest First</option>
+                <option value="views">Most Viewed</option>
+                <option value="title">Alphabetical (A-Z)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Videos Grid -->
+    {% if videos %}
+    <div class="row" id="vpCategoryVideoGrid">
+        {% for v in videos %}
+        <div class="col-12 col-sm-6 col-lg-3 mb-4 vp-cat-video-col" data-views="{{ v.views_count }}" data-title="{{ v.title|lower }}" data-id="{{ v.id }}">
+            <div class="vp-video-card" data-video-id="{{ v.id }}">
+                <div class="vp-card-thumbnail-wrap">
+                    <img src="{{ v.thumbnail_url or url_for('static', filename='img/logo.png') }}" class="vp-card-thumbnail-img" alt="{{ v.title }}" loading="lazy">
+                    <div class="vp-card-play-overlay">
+                        <div class="vp-card-play-btn"><i class="bi bi-play-fill"></i></div>
+                    </div>
+                    {% if v.source_type == 'youtube' %}
+                    <span class="vp-card-source-badge vp-source-youtube">YouTube</span>
+                    {% else %}
+                    <span class="vp-card-source-badge vp-source-local">Local HD</span>
+                    {% endif %}
+                    <span class="vp-card-badge"><i class="bi bi-eye"></i> {{ "{:,}".format(v.views_count) }}</span>
+                </div>
+                <div class="vp-card-body">
+                    <h5 class="vp-card-title">{{ v.title }}</h5>
+                    <p class="vp-card-desc">{{ v.description or "Watch on VIDSPLAY" }}</p>
+                    <div class="vp-card-footer">
+                        <span class="text-info">{{ category.name }}</span>
+                        <span class="badge bg-dark border border-secondary text-secondary">WATCH NOW</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="vp-empty-state">
+        <i class="bi bi-camera-reels vp-empty-icon"></i>
+        <h4>No Videos In This Category Yet</h4>
+        <p class="text-secondary">Videos assigned to {{ category.name }} from the admin dashboard will show here.</p>
+        <a href="{{ url_for('views.index') }}" class="btn vp-btn-primary mt-2">
+            <i class="bi bi-arrow-left"></i> Return to Home
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const sortSelect = document.getElementById('vpCategorySortSelect');
+    const grid = document.getElementById('vpCategoryVideoGrid');
+
+    if (sortSelect && grid) {
+        sortSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            const items = Array.from(grid.querySelectorAll('.vp-cat-video-col'));
+
+            items.sort((a, b) => {
+                if (val === 'views') {
+                    return parseInt(b.dataset.views || 0) - parseInt(a.dataset.views || 0);
+                } else if (val === 'title') {
+                    return (a.dataset.title || '').localeCompare(b.dataset.title || '');
+                } else {
+                    // newest (descending ID)
+                    return parseInt(b.dataset.id || 0) - parseInt(a.dataset.id || 0);
+                }
+            });
+
+            items.forEach(el => grid.appendChild(el));
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard | VIDSPLAY</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body class="bg-dark text-light admin-body">
+    <div class="container-fluid py-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="mb-1">Admin Dashboard</h2>
+          <p class="text-secondary mb-0">Manage videos, categories, navigation and pages.</p>
+        </div>
+        <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light">Logout</a>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-2"><div class="card bg-black border-secondary dashboard-card"><div class="card-body"><small class="text-secondary">Videos</small><h4>{{ stats.videos_total }}</h4></div></div></div>
+        <div class="col-md-2"><div class="card bg-black border-secondary dashboard-card"><div class="card-body"><small class="text-secondary">Published</small><h4>{{ stats.published }}</h4></div></div></div>
+        <div class="col-md-2"><div class="card bg-black border-secondary dashboard-card"><div class="card-body"><small class="text-secondary">Draft</small><h4>{{ stats.draft }}</h4></div></div></div>
+        <div class="col-md-2"><div class="card bg-black border-secondary dashboard-card"><div class="card-body"><small class="text-secondary">Categories</small><h4>{{ stats.categories }}</h4></div></div></div>
+        <div class="col-md-2"><div class="card bg-black border-secondary dashboard-card"><div class="card-body"><small class="text-secondary">Nav items</small><h4>{{ stats.nav_items }}</h4></div></div></div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="card bg-black border-secondary h-100">
+            <div class="card-header border-secondary bg-black fw-bold">Categories</div>
+            <ul class="list-group list-group-flush">
+              {% for category in categories %}
+                <li class="list-group-item bg-black border-secondary text-light">{{ category.title }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="card bg-black border-secondary h-100">
+            <div class="card-header border-secondary bg-black fw-bold">Recent videos</div>
+            <div class="table-responsive">
+              <table class="table table-dark table-striped align-middle mb-0">
+                <thead>
+                  <tr><th>Title</th><th>Status</th><th>Category</th></tr>
+                </thead>
+                <tbody>
+                  {% for video in videos[:8] %}
+                    <tr>
+                      <td>{{ video.title }}</td>
+                      <td>{{ video.status }}</td>
+                      <td>{{ video.category.title if video.category else 'General' }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

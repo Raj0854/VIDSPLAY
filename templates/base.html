@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VIDSPLAY — Watch Movies, Shows, Series, Gaming & Music{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}VIDSPLAY is your ultimate destination for entertainment content, movies, tv shows, web series, gaming, music and sports.{% endblock %}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3.3 & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom Modern Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="vp-navbar-glass">
+        <div class="container-fluid px-3 px-lg-4 d-flex align-items-center justify-content-between gap-3 py-2">
+            <a class="vp-brand flex-shrink-0" href="{{ url_for('views.index') }}">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="VIDSPLAY Logo" width="30" height="30">
+                <span>VIDS<span class="vp-brand-highlight">PLAY</span></span>
+            </a>
+
+            <div class="vp-search-container vp-header-search mx-auto">
+                <i class="bi bi-search vp-search-icon"></i>
+                <input class="form-control vp-search-input" id="vpSearchInput" type="search"
+                       placeholder="Search" aria-label="Search videos" autocomplete="off">
+                <button type="button" class="vp-search-submit" id="vpSearchSubmit" aria-label="Search">
+                    <i class="bi bi-search"></i>
+                </button>
+                <button type="button" class="vp-search-clear" id="vpSearchClear" aria-label="Clear search">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+                <div class="vp-search-results-dropdown" id="vpSearchResultsDropdown"></div>
+            </div>
+
+            <div class="dropdown flex-shrink-0">
+                <button class="btn btn-dark dropdown-toggle d-flex align-items-center gap-2" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account menu">
+                    <i class="bi bi-person-circle fs-5"></i>
+                    <span class="d-none d-md-inline">{{ current_user.username if current_user.is_authenticated else 'Account' }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
+                    {% if current_user.is_authenticated %}
+                    <li><a class="dropdown-item" href="{{ url_for('views.admin_dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Admin Panel</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('api_auth.logout') }}" onclick="event.preventDefault(); fetch('/api/auth/logout', {method:'POST'}).then(() => window.location.reload());"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    {% else %}
+                    <li><a class="dropdown-item" href="{{ url_for('views.admin_login') }}"><i class="bi bi-shield-lock me-2"></i>Admin Login</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('views.index') }}"><i class="bi bi-person me-2"></i>Guest</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Category tabs -->
+    <nav class="vp-nav-secondary sticky-top py-1">
+        <div class="container-fluid px-3 px-lg-4 overflow-hidden">
+            <ul class="nav nav-pills align-items-center flex-nowrap overflow-x-auto" id="vpDynamicNav">
+                <!-- Dynamic items rendered from /api/navigation -->
+                <li class="nav-item">
+                    <a class="vp-nav-link {% if request.path == url_for('views.index') %}active{% endif %}" href="{{ url_for('views.index') }}">Home</a>
+                </li>
+                {% if categories %}
+                {% for cat in categories %}
+                <li class="nav-item">
+                    <a class="vp-nav-link {% if request.path == url_for('views.category_view', slug=cat.slug) %}active{% endif %}" href="{{ url_for('views.category_view', slug=cat.slug) }}">{{ cat.name }}</a>
+                </li>
+                {% endfor %}
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Modern Marquee Banner -->
+    <div class="vp-marquee-wrapper">
+        <span class="vp-marquee-tag"><i class="bi bi-broadcast"></i> Trending</span>
+        <div class="vp-marquee-scroll">
+            <span class="vp-marquee-content">
+                {{ marquee_text or "Welcome to VIDSPLAY - Your Ultimate Destination for Movies, TV Shows, Web Series, Anime, Documentaries, Kids' Content, Music, Sports, and Dance Entertainment!" }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Universal Video Player Modal -->
+    <div class="modal fade" id="vpUniversalPlayerModal" tabindex="-1" aria-labelledby="vpPlayerTitle" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content vp-modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <div class="d-flex align-items-center">
+                        <span id="vpPlayerSourceBadge" class="badge bg-secondary me-2">Video</span>
+                        <span id="vpPlayerCategory" class="badge bg-dark border border-secondary text-info">Category</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body p-0 pt-2">
+                    <!-- Responsive 16:9 Video Container -->
+                    <div class="vp-player-wrapper" id="vpPlayerContainer">
+                        <!-- Injected dynamically by player.js -->
+                    </div>
+                    <div class="px-3 pt-2 text-end">
+                        <a id="vpPlayerExternalLink" class="small text-info d-none" target="_blank" rel="noopener noreferrer">
+                            Open on YouTube <i class="bi bi-box-arrow-up-right"></i>
+                        </a>
+                    </div>
+                    
+                    <!-- Video Info Section -->
+                    <div class="p-3 p-md-4">
+                        <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-2">
+                            <div>
+                                <h4 class="fw-bold text-white mb-1" id="vpPlayerTitle">Video Title</h4>
+                                <div class="text-secondary small">
+                                    <span id="vpPlayerViews" class="me-3"><i class="bi bi-eye"></i> 0 views</span>
+                                    <span id="vpPlayerDate"><i class="bi bi-calendar3"></i> Just now</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm vp-btn-glass" id="vpPlayerShareBtn">
+                                    <i class="bi bi-share"></i> Share
+                                </button>
+                            </div>
+                        </div>
+                        <hr class="border-secondary my-3">
+                        <p class="text-secondary mb-0" id="vpPlayerDesc">Video Description</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guest Profile Offcanvas -->
+    <div class="offcanvas offcanvas-end bg-black text-white" tabindex="-1" id="offcanvasProfile" aria-labelledby="offcanvasProfileLabel">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <h5 class="offcanvas-title" id="offcanvasProfileLabel">User Profile</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="text-center mb-4">
+                <img src="{{ url_for('static', filename='img/profilr.png') }}" alt="User Avatar" class="rounded-circle mb-2" width="90" height="90">
+                <h5 class="mb-0">Anonymous Viewer</h5>
+                <small class="text-muted">guest@vidsplay.com</small>
+            </div>
+            <div class="list-group list-group-flush bg-transparent">
+                <a href="{{ url_for('views.index') }}" class="list-group-item list-group-item-action bg-transparent text-white border-secondary">
+                    <i class="bi bi-film me-2"></i> Browse Catalogue
+                </a>
+                <a href="{{ url_for('views.admin_login') }}" class="list-group-item list-group-item-action bg-transparent text-info border-secondary">
+                    <i class="bi bi-shield-lock me-2"></i> Admin Sign In
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="vp-footer">
+        <div class="container text-center">
+            <div class="vp-footer-brand text-white">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="VIDSPLAY" width="24" height="24" class="me-2">
+                VIDS<span class="vp-brand-highlight">PLAY</span>
+            </div>
+            <p class="text-secondary mx-auto mb-4" style="max-width: 650px; font-size: 0.9rem;">
+                VIDSPLAY is your ultimate destination for diverse entertainment content including blockbuster movies, TV serials, thriller web series, high-energy gaming streams, documentaries, and chart-topping music videos.
+            </p>
+            <div class="mb-4">
+                <a href="https://facebook.com" class="vp-social-btn" target="_blank" rel="noopener"><i class="bi bi-facebook"></i></a>
+                <a href="https://twitter.com" class="vp-social-btn" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i></a>
+                <a href="https://instagram.com" class="vp-social-btn" target="_blank" rel="noopener"><i class="bi bi-instagram"></i></a>
+                <a href="https://youtube.com" class="vp-social-btn" target="_blank" rel="noopener"><i class="bi bi-youtube"></i></a>
+                <a href="https://github.com/Raj0854/VIDSPLAY" class="vp-social-btn" target="_blank" rel="noopener"><i class="bi bi-github"></i></a>
+            </div>
+            <div class="text-secondary small">
+                © 2026 VIDSPLAY Platform. All rights reserved. Built with Python Flask & Modern Web Tech.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- App & Player Scripts -->
+    <script src="{{ url_for('static', filename='js/player.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

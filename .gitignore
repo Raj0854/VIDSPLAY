@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Flask & DB
+instance/
+.webassets-cache
+vidsplay.db
+*.sqlite
+*.sqlite3
+
+# Environment variables
+.env
+
+# Uploads in dev (optional - we keep folder structure with .gitkeep)
+static/uploads/videos/*
+!static/uploads/videos/.gitkeep
+static/uploads/thumbnails/*
+!static/uploads/thumbnails/.gitkeep
+static/uploads/banners/*
+!static/uploads/banners/.gitkeep
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}{{ page.title }} | VIDSPLAY{% endblock %}
+{% block content %}
+  <main class="container py-4">
+    <h2 class="mb-3">{{ page.title }}</h2>
+    <p class="text-secondary">{{ page.description }}</p>
+    {% if blocks %}
+      <div class="mt-4">
+        {% for block in blocks %}
+          {% if block.type == 'heading' %}
+            <h3 class="mt-4">{{ block.text }}</h3>
+          {% elif block.type == 'text' %}
+            <p>{{ block.text }}</p>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </main>
+{% endblock %}

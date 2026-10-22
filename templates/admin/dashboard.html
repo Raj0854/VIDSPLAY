@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — VIDSPLAY Control Center</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+
+<div class="vp-admin-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="vp-admin-sidebar" id="vpAdminSidebar">
+        <div class="vp-admin-sidebar-brand">
+            <a href="{{ url_for('views.index') }}" class="vp-brand text-decoration-none">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" width="28" height="28" alt="Logo">
+                <span>VIDS<span class="vp-brand-highlight">PLAY</span></span>
+            </a>
+        </div>
+
+        <ul class="vp-admin-nav-list">
+            <li>
+                <a class="vp-admin-nav-link active" data-tab="overview">
+                    <i class="bi bi-grid-1x2"></i> Overview
+                </a>
+            </li>
+            <li>
+                <a class="vp-admin-nav-link" data-tab="videos">
+                    <i class="bi bi-film"></i> Videos
+                </a>
+            </li>
+            <li>
+                <a class="vp-admin-nav-link" data-tab="add-video">
+                    <i class="bi bi-cloud-arrow-up"></i> Add Video
+                </a>
+            </li>
+            <li>
+                <a class="vp-admin-nav-link" data-tab="categories">
+                    <i class="bi bi-tags"></i> Categories
+                </a>
+            </li>
+            <li>
+                <a class="vp-admin-nav-link" data-tab="navbar">
+                    <i class="bi bi-menu-button-wide"></i> Navbar Builder
+                </a>
+            </li>
+            <li>
+                <a class="vp-admin-nav-link" data-tab="pages">
+                    <i class="bi bi-layout-text-window-reverse"></i> Pages & Layouts
+                </a>
+            </li>
+            <li>
+                <a class="vp-admin-nav-link" data-tab="media">
+                    <i class="bi bi-images"></i> Media Library
+                </a>
+            </li>
+            <li>
+                <a class="vp-admin-nav-link" data-tab="settings">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </li>
+            <li>
+                <a class="vp-admin-nav-link" data-tab="activity">
+                    <i class="bi bi-clock-history"></i> Activity Logs
+                </a>
+            </li>
+        </ul>
+
+        <div class="p-3 border-top border-secondary mt-auto">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2 overflow-hidden">
+                    <i class="bi bi-person-circle fs-4 text-info"></i>
+                    <div class="text-truncate">
+                        <div class="fw-semibold text-white small text-truncate">{{ user.username }}</div>
+                        <div class="text-secondary" style="font-size: 0.72rem;">Administrator</div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1" id="adminLogoutBtn" title="Logout">
+                    <i class="bi bi-box-arrow-right fs-5"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="vp-admin-main">
+        <!-- Top Navigation Bar -->
+        <header class="vp-admin-topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-secondary d-lg-none" type="button" id="sidebarToggleBtn">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <h5 class="mb-0 fw-bold text-white" id="currentTabTitle">Dashboard Overview</h5>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <a href="{{ url_for('views.index') }}" target="_blank" class="btn btn-sm vp-btn-glass">
+                    <i class="bi bi-box-arrow-up-right"></i> View Website
+                </a>
+            </div>
+        </header>
+
+        <!-- Body Area for Tabs -->
+        <div class="vp-admin-content-body">
+
+            <!-- Toast Container -->
+            <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 2000;">
+                <div id="adminToast" class="toast align-items-center text-white bg-dark border-secondary shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body d-flex align-items-center gap-2" id="toastMessage">
+                            <i class="bi bi-info-circle text-info"></i> Action notification
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 TAB 1: OVERVIEW
+                 ========================================== -->
+            <div class="tab-pane-content" id="tab-overview">
+                <!-- Stats Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-lg-3">
+                        <div class="vp-stat-card">
+                            <div>
+                                <div class="text-secondary small fw-semibold">Total Videos</div>
+                                <h3 class="fw-bold text-white mb-0" id="statTotalVideos">0</h3>
+                            </div>
+                            <div class="vp-stat-icon-wrap vp-icon-cyan"><i class="bi bi-film"></i></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="vp-stat-card">
+                            <div>
+                                <div class="text-secondary small fw-semibold">Published / Draft</div>
+                                <h3 class="fw-bold text-white mb-0"><span id="statPublished">0</span> / <span id="statDraft" class="text-secondary">0</span></h3>
+                            </div>
+                            <div class="vp-stat-icon-wrap vp-icon-green"><i class="bi bi-check-circle"></i></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="vp-stat-card">
+                            <div>
+                                <div class="text-secondary small fw-semibold">Categories</div>
+                                <h3 class="fw-bold text-white mb-0" id="statCategories">0</h3>
+                            </div>
+                            <div class="vp-stat-icon-wrap vp-icon-purple"><i class="bi bi-tags"></i></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="vp-stat-card">
+                            <div>
+                                <div class="text-secondary small fw-semibold">Active Nav Tabs</div>
+                                <h3 class="fw-bold text-white mb-0" id="statNavTabs">0</h3>
+                            </div>
+                            <div class="vp-stat-icon-wrap vp-icon-amber"><i class="bi bi-menu-button-wide"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Recently Added Videos -->
+                    <div class="col-lg-7">
+                        <div class="vp-table-card h-100">
+                            <div class="vp-table-header">
+                                <h6 class="fw-bold text-white mb-0"><i class="bi bi-clock me-2 text-info"></i> Recently Added Videos</h6>
+                                <button class="btn btn-sm vp-btn-glass" onclick="switchAdminTab('videos')">View All</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="vp-table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Video</th>
+                                            <th>Category</th>
+                                            <th>Source</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="overviewRecentVideosTable">
+                                        <tr><td colspan="4" class="text-center text-muted py-3">Loading...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Administrative Activity -->
+                    <div class="col-lg-5">
+                        <div class="vp-table-card h-100">
+                            <div class="vp-table-header">
+                                <h6 class="fw-bold text-white mb-0"><i class="bi bi-activity me-2 text-info"></i> Recent Activity</h6>
+                                <button class="btn btn-sm vp-btn-glass" onclick="switchAdminTab('activity')">Full Log</button>
+                            </div>
+                            <div class="p-3" id="overviewRecentActivityList">
+                                <div class="text-center text-muted py-3">Loading activity...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 TAB 2: VIDEOS MANAGEMENT
+                 ========================================== -->
+            <div class="tab-pane-content d-none" id="tab-videos">
+                <div class="vp-table-card">
+                    <div class="vp-table-header">
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <input type="text" class="form-control form-control-sm bg-dark border-secondary text-white" id="videoSearchInput" placeholder="Search videos..." style="max-width: 220px;">
+                            <select class="form-select form-select-sm bg-dark border-secondary text-white" id="videoCategoryFilter" style="max-width: 180px;">
+                                <option value="">All Categories</option>
+                            </select>
+                            <select class="form-select form-select-sm bg-dark border-secondary text-white" id="videoStatusFilter" style="max-width: 140px;">
+                                <option value="all">All Status</option>
+                                <option value="published">Published</option>
+                                <option value="draft">Drafts</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-sm vp-btn-primary" onclick="switchAdminTab('add-video')">
+                            <i class="bi bi-plus-lg"></i> Add New Video
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="vp-table-custom">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80px;">Preview</th>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Source</th>
+                                    <th>Views</th>
+                                    <th>Status</th>
+                                    <th style="width: 140px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="videosTableBody">
+                                <tr><td colspan="7" class="text-center text-muted py-4">Loading videos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="p-3 border-top border-secondary d-flex align-items-center justify-content-between" id="videoPagination">
+                        <span class="text-secondary small" id="videoPaginationInfo">Showing 0 of 0</span>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm vp-btn-glass" id="videoPrevPageBtn" disabled><i class="bi bi-chevron-left"></i></button>
+                            <button class="btn btn-sm vp-btn-glass" id="videoNextPageBtn" disabled><i class="bi bi-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 TAB 3: ADD VIDEO (TWO METHODS: LOCAL UPLOAD & URL)
+                 ========================================== -->
+            <div class="tab-pane-content d-none" id="tab-add-video">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="p-4 rounded-4" style="background: var(--vp-bg-card); border: 1px solid var(--vp-border);">
+                            <h5 class="fw-bold text-white mb-2"><i class="bi bi-plus-circle text-info me-2"></i> Add New Video to VIDSPLAY</h5>
+                            <p class="text-secondary small mb-4">Choose whether to upload an MP4/WebM video file directly from your machine or paste a YouTube / direct streaming URL.</p>
+
+                            <!-- Method Tabs -->
+                            <ul class="nav nav-pills mb-4 p-1 rounded-3" style="background: rgba(255, 255, 255, 0.05); width: fit-content;">
+                                <li class="nav-item">
+                                    <button class="nav-link active text-white" id="methodUploadTab" data-bs-toggle="pill" data-bs-target="#methodUpload">
+                                        <i class="bi bi-upload me-1"></i> Option 1: Upload Local File
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link text-white" id="methodUrlTab" data-bs-toggle="pill" data-bs-target="#methodUrl">
+                                        <i class="bi bi-link-45deg me-1"></i> Option 2: Add via URL (YouTube / Embed)
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content">
+                                <!-- Option 1: Local Upload Form -->
+                                <div class="tab-pane fade show active" id="methodUpload">
+                                    <form id="uploadVideoForm">
+                                        <input type="hidden" name="source_type" value="local">
+
+                                        <!-- Dropzone -->
+                                        <div class="vp-dropzone mb-3" id="videoDropzone">
+                                            <i class="bi bi-cloud-arrow-up vp-dropzone-icon"></i>
+                                            <h6 class="text-white fw-semibold mb-1">Click to select video or drag & drop here</h6>
+                                            <p class="text-secondary small mb-2">Supported formats: MP4, WebM, OGG, MOV (Up to 500 MB)</p>
+                                            <input type="file" id="localVideoFileInput" name="video_file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="d-none" required>
+                                            <div id="selectedVideoFileName" class="text-info fw-semibold mt-2 small"></div>
+                                        </div>
+
+                                        <!-- Upload Progress Bar (hidden by default) -->
+                                        <div class="mb-3 d-none" id="uploadProgressWrapper">
+                                            <div class="d-flex justify-content-between text-secondary small mb-1">
+                                                <span>Uploading video...</span>
+                                                <span id="uploadProgressPercent">0%</span>
+                                            </div>
+                                            <div class="vp-progress-bar">
+                                                <div class="vp-progress-fill" id="uploadProgressFill"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-8">
+                                                <label class="form-label text-secondary small fw-semibold">Video Title *</label>
+                                                <input type="text" class="form-control bg-dark border-secondary text-white" name="title" id="uploadVideoTitle" placeholder="e.g. Inception 4K Trailer" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label text-secondary small fw-semibold">Category *</label>
+                                                <select class="form-select bg-dark border-secondary text-white" name="category_id" id="uploadCategorySelect" required>
+                                                    <option value="">Select Category</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label text-secondary small fw-semibold">Description</label>
+                                            <textarea class="form-control bg-dark border-secondary text-white" name="description" rows="3" placeholder="Enter video description and details..."></textarea>
+                                        </div>
+
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-md-6">
+                                                <label class="form-label text-secondary small fw-semibold">Thumbnail Poster Image (Optional)</label>
+                                                <input type="file" class="form-control bg-dark border-secondary text-white" name="thumbnail_file" accept="image/png,image/jpeg,image/webp,image/avif">
+                                                <div class="text-muted" style="font-size: 0.75rem;">Supported: JPG, PNG, WebP, AVIF</div>
+                                            </div>
+                                            <div class="col-md-6 d-flex align-items-center gap-4 pt-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" name="is_published" id="uploadPublishedSwitch" checked>
+                                                    <label class="form-check-label text-white small" for="uploadPublishedSwitch">Publish Immediately</label>
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" name="is_featured" id="uploadFeaturedSwitch">
+                                                    <label class="form-check-label text-white small" for="uploadFeaturedSwitch">Mark as Featured</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn vp-btn-primary" id="uploadSubmitBtn">
+                                            <i class="bi bi-cloud-arrow-up"></i> Upload and Save Video
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- Option 2: URL Form (YouTube / MP4) -->
+                                <div class="tab-pane fade" id="methodUrl">
+                                    <form id="urlVideoForm">
+                                        <input type="hidden" name="source_type" value="youtube">
+
+                                        <div class="mb-3">
+                                            <label class="form-label text-secondary small fw-semibold">Video URL (YouTube or Direct Video) *</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-link-45deg"></i></span>
+                                                <input type="url" class="form-control bg-dark border-secondary text-white" id="urlInput" placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..." required>
+                                                <button type="button" class="btn btn-outline-info" id="validateUrlBtn">Validate & Preview</button>
+                                            </div>
+                                            <div class="text-muted small mt-1">Accepts standard YouTube watch links, shorts, youtu.be, or direct .mp4 URLs.</div>
+                                        </div>
+
+                                        <!-- Live Preview Box -->
+                                        <div class="p-3 rounded-3 mb-3 d-none" id="urlPreviewBox" style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--vp-border);">
+                                            <div class="d-flex gap-3 align-items-center">
+                                                <img id="urlPreviewThumb" src="" alt="Thumbnail" class="rounded" style="width: 140px; height: 80px; object-fit: cover;">
+                                                <div>
+                                                    <span id="urlPreviewSourceBadge" class="badge vp-source-youtube mb-1">YouTube</span>
+                                                    <div class="fw-semibold text-white small" id="urlPreviewNormalized">Validated URL</div>
+                                                    <div class="text-success small"><i class="bi bi-check-circle"></i> URL validated successfully!</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-8">
+                                                <label class="form-label text-secondary small fw-semibold">Video Title *</label>
+                                                <input type="text" class="form-control bg-dark border-secondary text-white" id="urlVideoTitle" placeholder="e.g. Ed Sheeran - Sapphire" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label text-secondary small fw-semibold">Category *</label>
+                                                <select class="form-select bg-dark border-secondary text-white" id="urlCategorySelect" required>
+                                                    <option value="">Select Category</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label text-secondary small fw-semibold">Description</label>
+                                            <textarea class="form-control bg-dark border-secondary text-white" id="urlVideoDesc" rows="3" placeholder="Enter video details..."></textarea>
+                                        </div>
+
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-md-6">
+                                                <label class="form-label text-secondary small fw-semibold">Custom Thumbnail URL (Optional)</label>
+                                                <input type="text" class="form-control bg-dark border-secondary text-white" id="urlCustomThumb" placeholder="Leave blank to use auto-detected thumbnail">
+                                            </div>
+                                            <div class="col-md-6 d-flex align-items-center gap-4 pt-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="urlPublishedSwitch" checked>
+                                                    <label class="form-check-label text-white small" for="urlPublishedSwitch">Publish Immediately</label>
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="urlFeaturedSwitch">
+                                                    <label class="form-check-label text-white small" for="urlFeaturedSwitch">Mark as Featured</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn vp-btn-primary" id="urlSubmitBtn">
+                                            <i class="bi bi-check-lg"></i> Save Video to Catalogue
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 TAB 4: CATEGORY MANAGEMENT
+                 ========================================== -->
+            <div class="tab-pane-content d-none" id="tab-categories">
+                <div class="vp-table-card">
+                    <div class="vp-table-header">
+                        <div>
+                            <h6 class="fw-bold text-white mb-0">Video Categories</h6>
+                            <p class="text-secondary small mb-0">Organize your catalogue and navigation destinations</p>
+                        </div>
+                        <button class="btn btn-sm vp-btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                            <i class="bi bi-plus-lg"></i> New Category
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="vp-table-custom">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">Order</th>
+                                    <th>Name</th>
+                                    <th>Slug</th>
+                                    <th>Icon</th>
+                                    <th>Videos</th>
+                                    <th>Status</th>
+                                    <th style="width: 130px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoriesTableBody">
+                                <tr><td colspan="7" class="text-center text-muted py-4">Loading categories...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 TAB 5: DYNAMIC NAVBAR MANAGEMENT
+                 ========================================== -->
+            <div class="tab-pane-content d-none" id="tab-navbar">
+                <div class="vp-table-card">
+                    <div class="vp-table-header">
+                        <div>
+                            <h6 class="fw-bold text-white mb-0">Dynamic Navbar Configuration</h6>
+                            <p class="text-secondary small mb-0">Manage frontend navigation tabs dynamically without touching code</p>
+                        </div>
+                        <button class="btn btn-sm vp-btn-primary" data-bs-toggle="modal" data-bs-target="#addNavModal">
+                            <i class="bi bi-plus-lg"></i> Add Navbar Tab
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="vp-table-custom">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">Order</th>
+                                    <th>Label</th>
+                                    <th>Destination Type</th>
+                                    <th>Resolved Destination</th>
+                                    <th>Visibility</th>
+                                    <th>Status</th>
+                                    <th style="width: 140px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="navbarTableBody">
+                                <tr><td colspan="7" class="text-center text-muted py-4">Loading navbar items...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 TAB 6: PAGES & VISUAL SECTION BUILDER
+                 ========================================== -->
+            <div class="tab-pane-content d-none" id="tab-pages">
+                <div class="vp-table-card mb-4">
+                    <div class="vp-table-header">
+                        <div>
+                            <h6 class="fw-bold text-white mb-0">Custom Pages & Visual Section Builder</h6>
+                            <p class="text-secondary small mb-0">Create new URLs (e.g. /pages/anime) with custom section blocks</p>
+                        </div>
+                        <button class="btn btn-sm vp-btn-primary" data-bs-toggle="modal" data-bs-target="#createPageModal">
+                            <i class="bi bi-plus-lg"></i> Create New Page
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="vp-table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Page Title</th>
+                                    <th>Slug Route</th>
+                                    <th>Status</th>
+                                    <th>Sections</th>
+                                    <th style="width: 220px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pagesTableBody">
+                                <tr><td colspan="5" class="text-center text-muted py-4">Loading pages...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 TAB 7: MEDIA LIBRARY
+                 ========================================== -->
+            <div class="tab-pane-content d-none" id="tab-media">
+                <div class="vp-table-card">
+                    <div class="vp-table-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <select class="form-select form-select-sm bg-dark border-secondary text-white" id="mediaTypeFilter" style="width: 150px;">
+                                <option value="all">All Media</option>
+                                <option value="thumbnail">Thumbnails</option>
+                                <option value="video">Videos</option>
+                                <option value="banner">Banners</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="btn btn-sm vp-btn-primary mb-0 cursor-pointer">
+                                <i class="bi bi-upload"></i> Upload Asset
+                                <input type="file" id="mediaLibraryUploadInput" class="d-none">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="p-3">
+                        <div class="vp-media-grid" id="mediaGridContainer">
+                            <div class="text-center text-muted py-5 w-100">Loading media library...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 TAB 8: SITE SETTINGS
+                 ========================================== -->
+            <div class="tab-pane-content d-none" id="tab-settings">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="p-4 rounded-4" style="background: var(--vp-bg-card); border: 1px solid var(--vp-border);">
+                            <h5 class="fw-bold text-white mb-3"><i class="bi bi-sliders text-info me-2"></i> Global Website Settings</h5>
+                            
+                            <form id="siteSettingsForm">
+                                <div class="mb-3">
+                                    <label class="form-label text-secondary small fw-semibold">Platform Brand Name</label>
+                                    <input type="text" class="form-control bg-dark border-secondary text-white" id="settingSiteTitle" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label text-secondary small fw-semibold">Tagline</label>
+                                    <input type="text" class="form-control bg-dark border-secondary text-white" id="settingSiteTagline">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label text-secondary small fw-semibold">Announcement / Marquee Text</label>
+                                    <textarea class="form-control bg-dark border-secondary text-white" id="settingMarqueeText" rows="3"></textarea>
+                                    <div class="text-muted small mt-1">This text scrolls across the announcement banner below the primary navbar.</div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label text-secondary small fw-semibold">Administrator Contact Email</label>
+                                    <input type="email" class="form-control bg-dark border-secondary text-white" id="settingContactEmail">
+                                </div>
+
+                                <button type="submit" class="btn vp-btn-primary">
+                                    <i class="bi bi-check-lg"></i> Save All Settings
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==========================================
+                 TAB 9: ACTIVITY LOGS
+                 ========================================== -->
+            <div class="tab-pane-content d-none" id="tab-activity">
+                <div class="vp-table-card">
+                    <div class="vp-table-header">
+                        <h6 class="fw-bold text-white mb-0"><i class="bi bi-shield-check text-info me-2"></i> Administrative Audit Trail</h6>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="vp-table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                    <th>IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activityLogsTableBody">
+                                <tr><td colspan="5" class="text-center text-muted py-4">Loading activity logs...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- ==========================================
+     MODALS
+     ========================================== -->
+
+<!-- 1. Edit Video Modal -->
+<div class="modal fade" id="editVideoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content vp-modal-content">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-white">Edit Video Metadata</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editVideoForm">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="editVideoId">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Title</label>
+                        <input type="text" class="form-control bg-dark border-secondary text-white" id="editVideoTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold" for="editVideoCurrentSource">Current video source</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control bg-dark border-secondary text-white" id="editVideoCurrentSource" readonly>
+                            <a class="btn btn-outline-info d-none" id="editVideoOpenSource" target="_blank" rel="noopener noreferrer">
+                                <i class="bi bi-box-arrow-up-right"></i> Open
+                            </a>
+                        </div>
+                        <div class="form-text text-secondary">This is the source currently saved for the video.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold" for="editVideoSourceUrl">Replace video source URL (optional)</label>
+                        <input type="url" class="form-control bg-dark border-secondary text-white" id="editVideoSourceUrl"
+                               placeholder="Paste a new YouTube or direct MP4/WebM URL">
+                        <div class="form-text text-secondary">Leave blank to keep the current source. A new URL replaces it after you save.</div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">Category</label>
+                            <select class="form-select bg-dark border-secondary text-white" id="editVideoCategory"></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">Thumbnail URL</label>
+                            <input type="text" class="form-control bg-dark border-secondary text-white" id="editVideoThumbnail">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Description</label>
+                        <textarea class="form-control bg-dark border-secondary text-white" id="editVideoDesc" rows="3"></textarea>
+                    </div>
+                    <div class="d-flex gap-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="editVideoPublished">
+                            <label class="form-check-label text-white small" for="editVideoPublished">Published</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="editVideoFeatured">
+                            <label class="form-check-label text-white small" for="editVideoFeatured">Featured</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn vp-btn-glass" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn vp-btn-primary">Update Video</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Add / Edit Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content vp-modal-content">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-white" id="categoryModalTitle">Add New Category</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="categoryForm">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="categoryId">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Category Name *</label>
+                        <input type="text" class="form-control bg-dark border-secondary text-white" id="categoryName" placeholder="e.g. Anime" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">URL Slug (Optional)</label>
+                        <input type="text" class="form-control bg-dark border-secondary text-white" id="categorySlug" placeholder="e.g. anime">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Bootstrap Icon Class</label>
+                        <input type="text" class="form-control bg-dark border-secondary text-white" id="categoryIcon" placeholder="bi-film, bi-controller, bi-stars" value="bi-folder">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Description</label>
+                        <textarea class="form-control bg-dark border-secondary text-white" id="categoryDesc" rows="2"></textarea>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="categoryActiveSwitch" checked>
+                        <label class="form-check-label text-white small" for="categoryActiveSwitch">Active on Frontend</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn vp-btn-glass" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn vp-btn-primary">Save Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Add / Edit Navigation Tab Modal -->
+<div class="modal fade" id="addNavModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content vp-modal-content">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-white" id="navModalTitle">Add Navbar Tab</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="navItemForm">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="navItemId">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Tab Label *</label>
+                        <input type="text" class="form-control bg-dark border-secondary text-white" id="navItemLabel" placeholder="e.g. Anime or Special" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Destination Target *</label>
+                        <select class="form-select bg-dark border-secondary text-white" id="navItemTargetType">
+                            <option value="category">Category Page</option>
+                            <option value="page">Custom Page</option>
+                            <option value="custom">Custom URL / External</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="navCategorySelectGroup">
+                        <label class="form-label text-secondary small fw-semibold">Select Category</label>
+                        <select class="form-select bg-dark border-secondary text-white" id="navCategorySelect"></select>
+                    </div>
+                    <div class="mb-3 d-none" id="navPageSelectGroup">
+                        <label class="form-label text-secondary small fw-semibold">Select Custom Page</label>
+                        <select class="form-select bg-dark border-secondary text-white" id="navPageSelect"></select>
+                    </div>
+                    <div class="mb-3 d-none" id="navCustomUrlGroup">
+                        <label class="form-label text-secondary small fw-semibold">Custom Destination URL</label>
+                        <input type="text" class="form-control bg-dark border-secondary text-white" id="navCustomUrl" placeholder="https://... or /contact">
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-secondary small fw-semibold">Visibility</label>
+                            <select class="form-select bg-dark border-secondary text-white" id="navVisibility">
+                                <option value="all">Desktop & Mobile</option>
+                                <option value="desktop">Desktop Only</option>
+                                <option value="mobile">Mobile Only</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-secondary small fw-semibold">Icon Class (Optional)</label>
+                            <input type="text" class="form-control bg-dark border-secondary text-white" id="navIcon" placeholder="bi-star">
+                        </div>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="navActiveSwitch" checked>
+                        <label class="form-check-label text-white small" for="navActiveSwitch">Active</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn vp-btn-glass" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn vp-btn-primary">Save Tab</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Create Page Modal -->
+<div class="modal fade" id="createPageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content vp-modal-content">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-white">Create New Page</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createPageForm">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Page Title *</label>
+                        <input type="text" class="form-control bg-dark border-secondary text-white" id="newPageTitle" placeholder="e.g. Anime" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Slug Route</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary">/pages/</span>
+                            <input type="text" class="form-control bg-dark border-secondary text-white" id="newPageSlug" placeholder="anime">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-semibold">Meta Description (SEO)</label>
+                        <textarea class="form-control bg-dark border-secondary text-white" id="newPageMeta" rows="2" placeholder="SEO description..."></textarea>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="newPageNavbarCheck" checked>
+                        <label class="form-check-label text-white small" for="newPageNavbarCheck">Automatically add to navigation bar</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="newPagePublishCheck" checked>
+                        <label class="form-check-label text-white small" for="newPagePublishCheck">Publish immediately</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn vp-btn-glass" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn vp-btn-primary">Create Page</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 5. Visual Section Builder Modal -->
+<div class="modal fade" id="sectionBuilderModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content vp-modal-content">
+            <div class="modal-header border-secondary">
+                <div>
+                    <h5 class="modal-title text-white" id="builderPageTitle">Page Section Builder</h5>
+                    <p class="text-secondary small mb-0" id="builderPageSlug">Route: /pages/slug</p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="builderPageId">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-white mb-0">Page Sections Layout</h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm vp-btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-plus-lg"></i> Add Section
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="addSectionToPage('hero')"><i class="bi bi-star me-2"></i> Hero Banner</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="addSectionToPage('video_grid')"><i class="bi bi-grid-3x3 me-2"></i> Video Grid</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="addSectionToPage('category_grid')"><i class="bi bi-tags me-2"></i> Category Grid</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="addSectionToPage('banner')"><i class="bi bi-megaphone me-2"></i> Promo Banner</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="addSectionToPage('text')"><i class="bi bi-text-paragraph me-2"></i> Custom Text Block</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="builderSectionsList" class="mb-3">
+                    <div class="text-center py-4 text-secondary">Loading page sections...</div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn vp-btn-glass" data-bs-dismiss="modal">Close Builder</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 6. Confirmation Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content vp-modal-content">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i> Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-white mb-2" id="confirmDeletePrompt">Are you sure you want to delete this item?</p>
+                <p class="text-secondary small mb-0">This action cannot be undone.</p>
+                <div id="categoryReassignContainer" class="mt-3 d-none">
+                    <label class="form-label text-secondary small fw-semibold">Reassign Videos To (Optional):</label>
+                    <select class="form-select bg-dark border-secondary text-white" id="deleteReassignCategorySelect">
+                        <option value="">Do not reassign (Uncategorized)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn vp-btn-glass" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteActionBtn">Delete Record</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

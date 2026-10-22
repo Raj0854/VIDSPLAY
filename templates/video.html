@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}{{ video.title }} | VIDSPLAY{% endblock %}
+{% block content %}
+  <main class="container py-4">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="ratio ratio-16x9 rounded overflow-hidden border border-secondary">
+          {% if video.source_type == 'youtube' and video.playback_url %}
+            <iframe src="{{ video.playback_url }}" title="{{ video.title }}" allowfullscreen></iframe>
+          {% elif video.playback_url %}
+            <video controls class="w-100 h-100 bg-black" preload="metadata">
+              <source src="{{ video.playback_url }}" type="video/mp4">
+            </video>
+          {% else %}
+            <div class="d-flex align-items-center justify-content-center bg-black text-secondary">Video unavailable</div>
+          {% endif %}
+        </div>
+        <h2 class="mt-4">{{ video.title }}</h2>
+        <p class="text-secondary">{{ video.description or 'No description provided.' }}</p>
+      </div>
+      <div class="col-lg-4">
+        <div class="card bg-black border-secondary h-100">
+          <div class="card-body">
+            <h5 class="card-title">About this video</h5>
+            <ul class="list-unstyled text-secondary mb-0">
+              <li><strong class="text-light">Category:</strong> {{ video.category.title if video.category else 'General' }}</li>
+              <li><strong class="text-light">Source:</strong> {{ video.source_type }}</li>
+              <li><strong class="text-light">Status:</strong> {{ video.status }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock %}

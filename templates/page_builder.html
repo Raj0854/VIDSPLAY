@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}VIDSPLAY — {{ page.title }}{% endblock %}
+{% block meta_description %}{{ page.meta_description or page.title ~ ' on VIDSPLAY' }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+
+    {% if page.sections %}
+        {% for sec in page.sections %}
+            {% if sec.is_visible %}
+
+                {# 1. HERO SECTION #}
+                {% if sec.section_type == 'hero' %}
+                <div class="vp-hero-banner mb-5 text-{{ sec.config.get('align', 'start') }}">
+                    {% if sec.config.get('badge') %}
+                    <span class="vp-hero-badge"><i class="bi bi-star-fill"></i> {{ sec.config.get('badge') }}</span>
+                    {% endif %}
+                    <h1 class="display-5 fw-bold text-white mb-2">{{ sec.title or page.title }}</h1>
+                    {% if sec.subtitle %}
+                    <p class="lead text-secondary mb-4" style="max-width: 800px; margin-left: auto; margin-right: auto;">
+                        {{ sec.subtitle }}
+                    </p>
+                    {% endif %}
+                    {% if sec.config.get('cta_text') and sec.config.get('cta_url') %}
+                    <a href="{{ sec.config.get('cta_url') }}" class="btn vp-btn-primary">
+                        {{ sec.config.get('cta_text') }} <i class="bi bi-arrow-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
+
+                {# 2. VIDEO GRID SECTION #}
+                {% elif sec.section_type == 'video_grid' %}
+                <section class="mb-5" data-section-id="{{ sec.id }}">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div>
+                            <h3 class="fw-bold text-white mb-1">{{ sec.title or "Featured Collection" }}</h3>
+                            {% if sec.subtitle %}
+                            <p class="text-secondary small mb-0">{{ sec.subtitle }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row vp-section-video-grid" 
+                         data-category="{{ sec.config.get('category_slug', '') }}" 
+                         data-limit="{{ sec.config.get('limit', 8) }}" 
+                         data-cols="{{ sec.config.get('columns', 4) }}">
+                        <!-- Populated by JS -->
+                        <div class="col-12 text-center py-4 text-secondary">
+                            <div class="spinner-border spinner-border-sm text-info me-2"></div> Loading section videos...
+                        </div>
+                    </div>
+                </section>
+
+                {# 3. CATEGORY GRID SECTION #}
+                {% elif sec.section_type == 'category_grid' %}
+                <section class="mb-5">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h3 class="fw-bold text-white mb-0">{{ sec.title or "Explore All Categories" }}</h3>
+                    </div>
+                    <div class="row">
+                        {% if categories %}
+                        {% for cat in categories %}
+                        <div class="col-6 col-md-4 col-lg-3 mb-3">
+                            <a href="{{ url_for('views.category_view', slug=cat.slug) }}" class="text-decoration-none">
+                                <div class="p-3 rounded-3 text-center transition" style="background: var(--vp-bg-card); border: 1px solid var(--vp-border);">
+                                    <i class="bi {{ cat.icon or 'bi-folder' }} fs-1 text-info mb-2 d-block"></i>
+                                    <h6 class="text-white fw-semibold mb-0">{{ cat.name }}</h6>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </section>
+
+                {# 4. BANNER / PROMO SECTION #}
+                {% elif sec.section_type == 'banner' %}
+                <div class="p-4 p-md-5 rounded-4 mb-5 text-center position-relative overflow-hidden" 
+                     style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%), var(--vp-bg-card); border: 1px solid rgba(168, 85, 247, 0.3);">
+                    <h3 class="fw-bold text-white mb-2">{{ sec.title or "Exclusive Access" }}</h3>
+                    <p class="text-secondary mx-auto mb-4" style="max-width: 600px;">
+                        {{ sec.subtitle or "Upgrade your viewing experience with fresh daily uploads and playlists." }}
+                    </p>
+                    {% if sec.config.get('btn_text') %}
+                    <a href="{{ sec.config.get('btn_url', '#') }}" class="btn vp-btn-primary">
+                        {{ sec.config.get('btn_text') }}
+                    </a>
+                    {% endif %}
+                </div>
+
+                {# 5. TEXT / GENERAL CONTENT #}
+                {% elif sec.section_type == 'text' %}
+                <div class="p-4 rounded-3 mb-5" style="background: var(--vp-bg-card); border: 1px solid var(--vp-border);">
+                    <h4 class="fw-bold text-white mb-3">{{ sec.title }}</h4>
+                    <div class="text-secondary" style="line-height: 1.7;">
+                        {{ sec.subtitle | safe }}
+                    </div>
+                </div>
+
+                {% endif %}
+
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="vp-empty-state">
+            <i class="bi bi-layout-text-window-reverse vp-empty-icon"></i>
+            <h4>Empty Page</h4>
+            <p class="text-secondary">This page has no sections configured yet. Add sections in the admin Page Builder.</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // Populate video grids in sections
+    const grids = document.querySelectorAll('.vp-section-video-grid');
+    
+    for (const grid of grids) {
+        const catSlug = grid.dataset.category || '';
+        const limit = parseInt(grid.dataset.limit || 8);
+        const cols = parseInt(grid.dataset.cols || 4);
+        const colClass = cols === 3 ? 'col-lg-4' : (cols === 2 ? 'col-lg-6' : 'col-lg-3');
+
+        try {
+            let url = `/api/videos?per_page=${limit}`;
+            if (catSlug) url += `&category=${encodeURIComponent(catSlug)}`;
+            
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (!data.videos || data.videos.length === 0) {
+                grid.innerHTML = '<div class="col-12 text-secondary py-3 text-center">No videos available in this section.</div>';
+                continue;
+            }
+
+            let cardsHtml = '';
+            data.videos.forEach(v => {
+                const sourceBadge = v.source_type === 'youtube' 
+                    ? '<span class="vp-card-source-badge vp-source-youtube">YouTube</span>' 
+                    : '<span class="vp-card-source-badge vp-source-local">Local HD</span>';
+
+                cardsHtml += `
+                    <div class="col-12 col-sm-6 ${colClass} mb-4">
+                        <div class="vp-video-card" data-video-id="${v.id}">
+                            <div class="vp-card-thumbnail-wrap">
+                                <img src="${v.thumbnail_url || '/static/img/logo.png'}" class="vp-card-thumbnail-img" alt="${escapeHtml(v.title)}" loading="lazy">
+                                <div class="vp-card-play-overlay">
+                                    <div class="vp-card-play-btn"><i class="bi bi-play-fill"></i></div>
+                                </div>
+                                ${sourceBadge}
+                                <span class="vp-card-badge"><i class="bi bi-eye"></i> ${v.views_count.toLocaleString()}</span>
+                            </div>
+                            <div class="vp-card-body">
+                                <h5 class="vp-card-title">${escapeHtml(v.title)}</h5>
+                                <p class="vp-card-desc">${escapeHtml(v.description || 'Watch now on VIDSPLAY')}</p>
+                                <div class="vp-card-footer">
+                                    <span class="text-info">${escapeHtml(v.category_name)}</span>
+                                    <span class="badge bg-dark border border-secondary text-secondary">PLAY</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = cardsHtml;
+        } catch (err) {
+            console.error('Section load error:', err);
+            grid.innerHTML = '<div class="col-12 text-danger py-2 text-center">Failed to load section videos.</div>';
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+});
+</script>
+{% endblock %}

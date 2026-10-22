@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}VIDSPLAY — Home | Watch Movies, TV Shows, Web Series & Music{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 py-4">
+
+    <!-- Hero Spotlight Banner -->
+    <div class="vp-hero-banner">
+        <div class="row align-items-center">
+            <div class="col-lg-7 mb-4 mb-lg-0">
+                <span class="vp-hero-badge"><i class="bi bi-fire"></i> Spotlight Release</span>
+                <h1 class="display-5 fw-bold text-white mb-3">Unlimited Entertainment, Curated for You</h1>
+                <p class="lead text-secondary mb-4" style="font-size: 1.05rem;">
+                    Watch trending Bollywood movies, binge-worthy Indian web series, hilarious comedy episodes, live gaming action, and hit music videos in crisp HD.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    {% if featured_video %}
+                    <button class="btn vp-btn-primary" data-video-id="{{ featured_video.id }}">
+                        <i class="bi bi-play-fill fs-5"></i> Watch Featured
+                    </button>
+                    {% endif %}
+                    <a href="#browse-categories" class="btn vp-btn-glass">
+                        <i class="bi bi-grid-fill"></i> Explore Categories
+                    </a>
+                </div>
+            </div>
+            {% if featured_video %}
+            <div class="col-lg-5">
+                <div class="vp-video-card" data-video-id="{{ featured_video.id }}">
+                    <div class="vp-card-thumbnail-wrap">
+                        <img src="{{ featured_video.thumbnail_url or url_for('static', filename='img/logo.png') }}" class="vp-card-thumbnail-img" alt="{{ featured_video.title }}">
+                        <div class="vp-card-play-overlay">
+                            <div class="vp-card-play-btn"><i class="bi bi-play-fill"></i></div>
+                        </div>
+                        <span class="vp-card-source-badge {% if featured_video.source_type == 'youtube' %}vp-source-youtube{% else %}vp-source-local{% endif %}">Featured</span>
+                        <span class="vp-card-badge"><i class="bi bi-eye"></i> {{ "{:,}".format(featured_video.views_count) }}</span>
+                    </div>
+                    <div class="vp-card-body">
+                        <h5 class="vp-card-title">{{ featured_video.title }}</h5>
+                        <p class="vp-card-desc">{{ featured_video.description or "Watch on VIDSPLAY" }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Category Quick Filters -->
+    <section class="mb-5" id="browse-categories">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h4 class="fw-bold text-white mb-0"><i class="bi bi-tags-fill text-info me-2"></i> Browse Categories</h4>
+        </div>
+        <div class="d-flex gap-2 overflow-x-auto pb-2" style="scrollbar-width: thin;">
+            <a href="{{ url_for('views.index') }}" class="vp-category-chip active">
+                <i class="bi bi-grid"></i> All Videos
+            </a>
+            {% if categories %}
+            {% for cat in categories %}
+            <a href="{{ url_for('views.category_view', slug=cat.slug) }}" class="vp-category-chip">
+                <i class="{{ cat.icon or 'bi-folder' }}"></i> {{ cat.name }}
+            </a>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Dynamic Video Sections Container -->
+    <div id="vpHomeVideoSections">
+        <!-- Rendered dynamically from backend API /api/videos -->
+        <div class="text-center py-5" id="vpLoadingPlaceholder">
+            <div class="spinner-border text-info" role="status">
+                <span class="visually-hidden">Loading Catalogue...</span>
+            </div>
+            <p class="text-secondary mt-2">Loading VIDSPLAY video library...</p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const container = document.getElementById('vpHomeVideoSections');
+    const placeholder = document.getElementById('vpLoadingPlaceholder');
+
+    try {
+        // Fetch all categories with published videos
+        const catRes = await fetch('/api/categories');
+        const catData = await catRes.json();
+
+        // Fetch videos
+        const vidRes = await fetch('/api/videos?per_page=50');
+        const vidData = await vidRes.json();
+
+        if (placeholder) placeholder.remove();
+
+        if (!vidData.videos || vidData.videos.length === 0) {
+            container.innerHTML = `
+                <div class="vp-empty-state">
+                    <i class="bi bi-film vp-empty-icon"></i>
+                    <h4>No Videos Found</h4>
+                    <p>Videos added from the admin dashboard will appear here.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const videos = vidData.videos;
+        let html = '';
+
+        // 1. Recommended / Featured
+        const featured = videos.filter(v => v.is_featured);
+        if (featured.length > 0) {
+            html += renderVideoSection('Recommended For You', 'bi-stars', featured.slice(0, 4));
+        }
+
+        // 2. Trending
+        const trending = [...videos].sort((a, b) => b.views_count - a.views_count).slice(0, 4);
+        html += renderVideoSection('Trending on VIDSPLAY', 'bi-fire', trending);
+
+        // 3. Category Grids
+        if (catData.categories) {
+            catData.categories.forEach(cat => {
+                const catVideos = videos.filter(v => v.category_id === cat.id);
+                if (catVideos.length > 0) {
+                    html += renderVideoSection(
+                        cat.name, 
+                        cat.icon || 'bi-collection-play', 
+                        catVideos.slice(0, 4), 
+                        `/category/${cat.slug}`
+                    );
+                }
+            });
+        }
+
+        container.innerHTML = html;
+    } catch (err) {
+        console.error('Error rendering homepage videos:', err);
+        if (placeholder) {
+            placeholder.innerHTML = `
+                <div class="text-danger py-4">
+                    <i class="bi bi-exclamation-triangle fs-2"></i>
+                    <p class="mt-2">Unable to load videos. Please refresh the page.</p>
+                </div>
+            `;
+        }
+    }
+
+    function renderVideoSection(title, iconClass, videoList, viewAllUrl = null) {
+        if (!videoList || videoList.length === 0) return '';
+        
+        let cardsHtml = '';
+        videoList.forEach(v => {
+            const sourceBadge = v.source_type === 'youtube' 
+                ? '<span class="vp-card-source-badge vp-source-youtube">YouTube</span>' 
+                : '<span class="vp-card-source-badge vp-source-local">Local HD</span>';
+
+            cardsHtml += `
+                <div class="col-12 col-sm-6 col-lg-3 mb-4">
+                    <div class="vp-video-card" data-video-id="${v.id}">
+                        <div class="vp-card-thumbnail-wrap">
+                            <img src="${v.thumbnail_url || '/static/img/logo.png'}" class="vp-card-thumbnail-img" alt="${escapeHtml(v.title)}" loading="lazy">
+                            <div class="vp-card-play-overlay">
+                                <div class="vp-card-play-btn"><i class="bi bi-play-fill"></i></div>
+                            </div>
+                            ${sourceBadge}
+                            <span class="vp-card-badge"><i class="bi bi-eye"></i> ${v.views_count.toLocaleString()}</span>
+                        </div>
+                        <div class="vp-card-body">
+                            <h5 class="vp-card-title">${escapeHtml(v.title)}</h5>
+                            <p class="vp-card-desc">${escapeHtml(v.description || 'Watch now on VIDSPLAY')}</p>
+                            <div class="vp-card-footer">
+                                <span class="text-info">${escapeHtml(v.category_name)}</span>
+                                <span class="badge bg-dark border border-secondary text-secondary">PLAY</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        const viewAllBtn = viewAllUrl 
+            ? `<a href="${viewAllUrl}" class="btn btn-sm vp-btn-glass">View All <i class="bi bi-arrow-right"></i></a>` 
+            : '';
+
+        return `
+            <section class="mb-5">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h3 class="fw-bold text-white mb-0">
+                        <i class="bi ${iconClass} text-info me-2"></i> ${escapeHtml(title)}
+                    </h3>
+                    ${viewAllBtn}
+                </div>
+                <div class="row">
+                    ${cardsHtml}
+                </div>
+            </section>
+        `;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+});
+</script>
+{% endblock %}
