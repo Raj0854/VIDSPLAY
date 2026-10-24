@@ -230,7 +230,7 @@ def run_seed():
                         existing.source_type = "youtube"
                         existing.source_url = f"https://www.youtube.com/watch?v={item['yt_id']}"
                         existing.embed_code = item["yt_id"]
-                    if item["img"]:
+                    if item["img"] and not existing.thumbnail_url:
                         existing.thumbnail_url = item["img"]
                     if cat and not existing.category_id:
                         existing.category_id = cat.id

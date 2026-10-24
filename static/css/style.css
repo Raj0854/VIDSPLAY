@@ -21,6 +21,9 @@
 }
 
 .vp-nav-secondary {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
     background: #0b0f19 !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -44,6 +47,8 @@
 }
 
 .vp-navbar-glass {
+    position: relative;
+    z-index: 1050;
     background: #292d32 !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }

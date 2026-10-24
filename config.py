@@ -28,7 +28,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     ENV = "development"
     SESSION_COOKIE_SECURE = False
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'instance' / 'vidsplay.db'}")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'instance' / 'vidsplay_v2.db'}")
 
 
 class TestingConfig(Config):
@@ -49,7 +49,7 @@ class ProductionConfig(Config):
     db_url = os.getenv("DATABASE_URL", "")
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
-    SQLALCHEMY_DATABASE_URI = db_url or f"sqlite:///{BASE_DIR / 'vidsplay.db'}"
+    SQLALCHEMY_DATABASE_URI = db_url or f"sqlite:///{BASE_DIR / 'instance' / 'vidsplay_v2.db'}"
 
 
 config_by_name = {

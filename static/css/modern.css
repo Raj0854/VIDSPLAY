@@ -39,17 +39,22 @@ body {
 
 /* Glassmorphism navbar */
 .vp-navbar-glass {
+    position: relative;
     background: var(--vp-bg-glass) !important;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--vp-border);
     transition: var(--vp-transition);
+    z-index: 1050;
 }
 
 .vp-nav-secondary {
+    position: sticky;
+    top: 0;
     background: rgba(10, 14, 23, 0.9) !important;
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--vp-border);
+    z-index: 1020;
 }
 
 /* Brand styling */
@@ -76,6 +81,7 @@ body {
     position: relative;
     max-width: 460px;
     width: 100%;
+    z-index: 1055;
 }
 
 .vp-search-input {
@@ -128,8 +134,18 @@ body {
     box-shadow: var(--vp-shadow-md);
     max-height: 420px;
     overflow-y: auto;
-    z-index: 1050;
+    z-index: 1065;
     display: none;
+}
+
+/* Account Dropdown */
+.vp-navbar-glass .dropdown {
+    position: relative;
+    z-index: 1055;
+}
+
+.vp-navbar-glass .dropdown-menu {
+    z-index: 1065 !important;
 }
 
 .vp-search-result-item {
@@ -218,8 +234,13 @@ body {
 }
 
 @keyframes vp-marquee {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(-100%, 0); }
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(-100%, 0);
+    }
 }
 
 /* Modern Video Card */
@@ -245,7 +266,8 @@ body {
 .vp-card-thumbnail-wrap {
     position: relative;
     width: 100%;
-    padding-top: 56.25%; /* 16:9 ratio */
+    padding-top: 56.25%;
+    /* 16:9 ratio */
     overflow: hidden;
     background: #0f172a;
 }
@@ -393,7 +415,8 @@ body {
     white-space: nowrap;
 }
 
-.vp-category-chip:hover, .vp-category-chip.active {
+.vp-category-chip:hover,
+.vp-category-chip.active {
     background: var(--vp-accent-gradient);
     color: #0b0f19;
     border-color: transparent;
@@ -405,7 +428,7 @@ body {
 /* Hero Showcase Banner */
 .vp-hero-banner {
     background: linear-gradient(135deg, rgba(17, 24, 39, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%),
-                radial-gradient(circle at top right, rgba(79, 172, 254, 0.18), transparent 60%);
+        radial-gradient(circle at top right, rgba(79, 172, 254, 0.18), transparent 60%);
     border: 1px solid var(--vp-border);
     border-radius: var(--vp-radius-lg);
     padding: 2.75rem 2rem;
@@ -439,7 +462,8 @@ body {
 
 .vp-player-wrapper {
     position: relative;
-    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    padding-top: 56.25%;
+    /* 16:9 Aspect Ratio */
     background: #000000;
 }
 
@@ -503,8 +527,13 @@ body {
 }
 
 @keyframes vp-skeleton-loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 /* Empty State */

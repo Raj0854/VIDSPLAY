@@ -10,7 +10,7 @@
         <div class="row align-items-center">
             <div class="col-lg-7 mb-4 mb-lg-0">
                 <span class="vp-hero-badge"><i class="bi bi-fire"></i> Spotlight Release</span>
-                <h1 class="display-5 fw-bold text-white mb-3">Unlimited Entertainment, Curated for You</h1>
+                <h1 class="display-5 fw-bold text-white mb-3">{{ site_tagline or 'Unlimited Entertainment, Curated for You' }}</h1>
                 <p class="lead text-secondary mb-4" style="font-size: 1.05rem;">
                     Watch trending Bollywood movies, binge-worthy Indian web series, hilarious comedy episodes, live gaming action, and hit music videos in crisp HD.
                 </p>
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const catData = await catRes.json();
 
         // Fetch videos
-        const vidRes = await fetch('/api/videos?per_page=50');
+        const vidRes = await fetch('/api/videos?per_page=100');
         const vidData = await vidRes.json();
 
         if (placeholder) placeholder.remove();

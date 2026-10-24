@@ -53,12 +53,12 @@ def upgrade_legacy_sqlite_schema(engine):
             if "order_index" in columns:
                 connection.execute(text(
                     "UPDATE categories SET display_order = order_index "
-                    "WHERE display_order = 0"
+                    "WHERE display_order IS NULL"
                 ))
             if "is_visible" in columns:
                 connection.execute(text(
                     "UPDATE categories SET is_active = is_visible "
-                    "WHERE is_active = 1"
+                    "WHERE is_active IS NULL"
                 ))
 
         _add_columns(connection, tables, "videos", {
@@ -87,12 +87,12 @@ def upgrade_legacy_sqlite_schema(engine):
             if "status" in columns:
                 connection.execute(text(
                     "UPDATE videos SET is_published = CASE WHEN status = 'published' "
-                    "THEN 1 ELSE 0 END"
+                    "THEN 1 ELSE 0 END WHERE is_published IS NULL"
                 ))
             if {"original_url", "playback_url", "source_type"} <= columns:
                 rows = connection.execute(text(
                     "SELECT id, original_url, playback_url, source_type, embed_code "
-                    "FROM videos WHERE source_type = 'youtube'"
+                    "FROM videos WHERE source_type = 'youtube' AND (embed_code IS NULL OR embed_code = '')"
                 )).mappings()
                 for row in rows:
                     video_id = row["id"]
@@ -125,21 +125,25 @@ def upgrade_legacy_sqlite_schema(engine):
                 ))
             if "item_type" in columns:
                 connection.execute(text(
-                    "UPDATE navigation_items SET target_type = item_type"
+                    "UPDATE navigation_items SET target_type = item_type "
+                    "WHERE target_type IS NULL OR target_type = ''"
                 ))
             if "order_index" in columns:
                 connection.execute(text(
-                    "UPDATE navigation_items SET display_order = order_index"
+                    "UPDATE navigation_items SET display_order = order_index "
+                    "WHERE display_order IS NULL"
                 ))
             if "is_enabled" in columns:
                 connection.execute(text(
-                    "UPDATE navigation_items SET is_active = is_enabled"
+                    "UPDATE navigation_items SET is_active = is_enabled "
+                    "WHERE is_active IS NULL"
                 ))
             if {"is_mobile", "is_desktop"} <= columns:
                 connection.execute(text(
                     "UPDATE navigation_items SET visibility = CASE "
                     "WHEN is_mobile = 1 AND is_desktop = 1 THEN 'all' "
-                    "WHEN is_mobile = 1 THEN 'mobile' ELSE 'desktop' END"
+                    "WHEN is_mobile = 1 THEN 'mobile' ELSE 'desktop' END "
+                    "WHERE visibility IS NULL OR visibility = ''"
                 ))
             if "created_at" in columns:
                 connection.execute(text(

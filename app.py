@@ -46,6 +46,37 @@ def create_app(config_name=None):
         with app.app_context():
             db.create_all()
             upgrade_legacy_sqlite_schema(db.engine)
+            # Sync admin credentials from .env if configured
+            admin_user = (os.getenv("ADMIN_USERNAME") or "").strip()
+            admin_pass = (os.getenv("ADMIN_PASSWORD") or "").strip()
+            admin_email = (os.getenv("ADMIN_EMAIL") or "admin@vidsplay.com").strip()
+            if admin_user and admin_pass:
+                admin = AdminUser.query.filter(
+                    (AdminUser.username == admin_user) | (AdminUser.role == "admin")
+                ).first()
+                if not admin:
+                    admin = AdminUser(
+                        username=admin_user,
+                        email=admin_email,
+                        role="admin",
+                        is_active_account=True,
+                    )
+                    admin.set_password(admin_pass)
+                    db.session.add(admin)
+                    db.session.commit()
+                else:
+                    changed = False
+                    if admin.username != admin_user:
+                        admin.username = admin_user
+                        changed = True
+                    if admin_email and admin.email != admin_email:
+                        admin.email = admin_email
+                        changed = True
+                    if not admin.check_password(admin_pass):
+                        admin.set_password(admin_pass)
+                        changed = True
+                    if changed:
+                        db.session.commit()
 
     migrate.init_app(app, db)
     login_manager.init_app(app)
@@ -68,6 +99,39 @@ def create_app(config_name=None):
     app.register_blueprint(pages_bp)
     app.register_blueprint(media_bp)
     app.register_blueprint(dashboard_bp)
+
+    # Inject dynamic site settings into all templates
+    @app.context_processor
+    def inject_site_settings():
+        try:
+            settings = {s.key: s.value for s in SiteSetting.query.all()}
+        except Exception:
+            settings = {}
+        defaults = {
+            "site_title": "VIDSPLAY",
+            "site_tagline": "Unlimited Entertainment, Curated for You",
+            "marquee_text": "Welcome to VIDSPLAY - Your Ultimate Destination for Movies, TV Shows, Web Series, Anime, Documentaries, Kids' Content, Music, Sports, and Dance Entertainment!",
+            "contact_email": "admin@vidsplay.com",
+        }
+        for k, v in defaults.items():
+            if k not in settings or not settings[k]:
+                settings[k] = v
+        return {
+            "site_title": settings["site_title"],
+            "site_tagline": settings["site_tagline"],
+            "marquee_text": settings["marquee_text"],
+            "contact_email": settings["contact_email"],
+            "site_settings": settings,
+        }
+
+    # Ensure responses are never cached so newest content is always shown on reload
+    @app.after_request
+    def add_cache_control(response):
+        if "Cache-Control" not in response.headers:
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
 
     # Error handlers
     @app.errorhandler(404)
